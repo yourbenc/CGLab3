@@ -14,6 +14,7 @@ namespace WpfApp1
         private WriteableBitmap _patternBitmap;
         private bool _isDrawing = false;
         private Point _lastMousePos;
+        private Point? _lineStartPoint = null;
 
         public MainWindow()
         {
@@ -110,6 +111,126 @@ namespace WpfApp1
                 }
                 // Внутри этого метода уже есть правильная блокировка
                 GraphicsAlgorithms.FloodFillSpanPattern(_bitmap, x, y, _patternBitmap);
+            }
+            else if (ModeTraceBoundary.IsChecked == true)
+            {
+                // Ищем границу чёрного цвета,
+                // начиная с точки, по которой кликнул пользователь
+                var boundary = GraphicsAlgorithms.TraceBoundary(
+                    _bitmap,
+                    x,
+                    y,
+                    Colors.Black);
+
+                // Если граница не найдена
+                if (boundary.Count == 0)
+                {
+                    MessageBox.Show(
+                        "Граница не найдена. Кликните по чёрной границе области.");
+                    return;
+                }
+
+                // Для контроля прорисовываем найденную границу
+                // поверх исходного изображения красным цветом
+                _bitmap.Lock();
+
+                try
+                {
+                    foreach (Point point in boundary)
+                    {
+                        GraphicsAlgorithms.SetPixelFast(
+                            _bitmap,
+                            (int)point.X,
+                            (int)point.Y,
+                            Colors.Red);
+                    }
+
+                    // Обновляем изображение
+                    _bitmap.AddDirtyRect(
+                        new Int32Rect(
+                            0,
+                            0,
+                            _bitmap.PixelWidth,
+                            _bitmap.PixelHeight));
+                }
+                finally
+                {
+                    _bitmap.Unlock();
+                }
+
+                MessageBox.Show(
+                    $"Граница найдена. Количество точек: {boundary.Count}");
+            }
+
+            else if (ModeBresenham.IsChecked == true)
+            {
+                // Если это первый клик — запоминаем начальную точку
+                if (_lineStartPoint == null)
+                {
+                    _lineStartPoint = new Point(x, y);
+
+                    MessageBox.Show(
+                        "Начальная точка выбрана. Теперь выберите конечную точку.");
+                }
+                else
+                {
+                    // Второй клик — это конечная точка
+                    Point start = _lineStartPoint.Value;
+
+                    int x0 = (int)start.X;
+                    int y0 = (int)start.Y;
+
+                    int x1 = x;
+                    int y1 = y;
+
+                    // Рисуем отрезок алгоритмом Брезенхема
+                    GraphicsAlgorithms.DrawLineBresenham(
+                        _bitmap,
+                        x0,
+                        y0,
+                        x1,
+                        y1,
+                        Colors.Black);
+
+                    // Сбрасываем первую точку,
+                    // чтобы можно было нарисовать новый отрезок
+                    _lineStartPoint = null;
+                }
+            }
+
+            else if (ModeWu.IsChecked == true)
+            {
+                // Первый клик — запоминаем начало отрезка
+                if (_lineStartPoint == null)
+                {
+                    _lineStartPoint = new Point(x, y);
+
+                    MessageBox.Show(
+                        "Начальная точка выбрана. Теперь выберите конечную точку.");
+                }
+                else
+                {
+                    // Второй клик — конечная точка
+                    Point start = _lineStartPoint.Value;
+
+                    int x0 = (int)start.X;
+                    int y0 = (int)start.Y;
+
+                    int x1 = x;
+                    int y1 = y;
+
+                    // Рисуем отрезок алгоритмом Ву
+                    GraphicsAlgorithms.DrawLineWu(
+                        _bitmap,
+                        x0,
+                        y0,
+                        x1,
+                        y1,
+                        Colors.Black);
+
+                    // Сбрасываем первую точку
+                    _lineStartPoint = null;
+                }
             }
         }
 

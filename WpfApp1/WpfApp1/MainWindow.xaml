@@ -14,6 +14,10 @@
             <RadioButton x:Name="ModeDraw" Content="1. Рисование границы" IsChecked="True" Margin="0,5"/>
             <RadioButton x:Name="ModeFillColor" Content="2. Заливка цветом (Зад. 1а)" Margin="0,5"/>
             <RadioButton x:Name="ModeFillPattern" Content="3. Заливка рисунком (Зад. 1б)" Margin="0,5"/>
+            <RadioButton x:Name="ModeTraceBoundary" Content="4. Выделение границы (Зад. 1в)" Margin="0,5"/>
+            <RadioButton x:Name="ModeBresenham" Content="5. Отрезок Брезенхема (Зад. 2)" Margin="0,5"/>
+            <RadioButton x:Name="ModeWu" Content="6. Отрезок Ву (Зад. 2)" Margin="0,5"/>
+
 
             <Separator Margin="0,15"/>
 
